@@ -4,6 +4,7 @@
   "description": "Recoverable Bitcoin Cash gifts implemented as a General Protocols XO template.",
   "main": "index.js",
   "scripts": {
+    "build": "npm run export && node scripts/build-site.mjs",
     "export": "tsx export.ts",
     "check": "tsc --noEmit",
     "dev": "node server.mjs",
