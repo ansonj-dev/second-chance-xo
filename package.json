@@ -1,7 +1,7 @@
 {
   "name": "second-chance-xo",
   "version": "1.0.0",
-  "description": "",
+  "description": "Recoverable Bitcoin Cash gifts implemented as a General Protocols XO template.",
   "main": "index.js",
   "scripts": {
     "export": "tsx export.ts",
@@ -18,7 +18,7 @@
     "wallet:move-plan": "tsx prepare-wallet-move.ts",
     "wallet:xo-addresses": "tsx xo-addresses.ts"
   },
-  "keywords": [],
+  "keywords": ["bitcoin-cash", "xo", "cashtokens", "smart-contract", "recovery"],
   "author": "",
   "license": "ISC",
   "type": "module",

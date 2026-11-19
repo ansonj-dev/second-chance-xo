@@ -1,6 +1,10 @@
 # Second Chance
 
-Judging status: **not submission-ready**. The complete criterion matrix and validation limits are in [docs/JUDGING-AUDIT.md](docs/JUDGING-AUDIT.md). Mandatory executed Chipnet invitation/debug-tool evidence and human-written feedback are still missing.
+## Bounty readiness
+
+**Status: not submission-ready.** The template, planner, and public invitation export are present, but no invitation has been executed through the XO debug tool on Chipnet or Mainnet. There is no final invitation to inspect or submit, and no follow-up transaction evidence. The bounty also requires development feedback written personally by the participant after hands-on use; this repository contains only an evidence worksheet.
+
+The [Build with XO bounty](https://bchblaze.cash/bounties/build-with-xo/) also requires a functional template, a debug-inspectable executed transaction, reproduction instructions, and feedback on the development experience. See the [criterion audit](docs/JUDGING-AUDIT.md) and [invitation guide](docs/INVITATIONS.md) for exact evidence requirements. The public source is at [github.com/ansonj-dev/second-chance-xo](https://github.com/ansonj-dev/second-chance-xo); the executed invitation and hosted demo remain outstanding.
 
 Recoverable BCH gifts as a fresh XO template. The recipient may claim with their own key; after a relative block delay the sender may recover an unspent gift. The claim is still valid after recovery matures: whichever spend confirms first wins. There is no precise calendar expiry.
 
