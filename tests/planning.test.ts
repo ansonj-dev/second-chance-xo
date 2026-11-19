@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import test from 'node:test';
+import { planGift,validateGiftParameters } from '../planning.js';
+const sample=JSON.parse(readFileSync(new URL('../docs/public-parameters.EXAMPLE.json',import.meta.url),'utf8'));
+test('compiles the reviewed gift policy to a Chipnet-address plan',()=>{const plan=planGift(sample);assert.match(plan.chipnetAddress,/^bchtest:/);assert.match(plan.lockingBytecode,/^aa20[0-9a-f]{64}87$/)});
+for(const delayBlocks of [0,-1,65536,0x80000001,1.5,'144']) test(`rejects unsafe delay ${delayBlocks}`,()=>assert.throws(()=>validateGiftParameters({...sample,delayBlocks})));
+test('rejects invalid curve points even with valid compressed-key length',()=>assert.throws(()=>validateGiftParameters({...sample,senderPublicKey:'02'+'ff'.repeat(32)})));
+test('rejects reused participant keys',()=>assert.throws(()=>validateGiftParameters({...sample,recipientPublicKey:sample.senderPublicKey})));
+test('rejects floating point amounts and unknown secret-like fields',()=>{assert.throws(()=>validateGiftParameters({...sample,giftSatoshis:25000}));assert.throws(()=>validateGiftParameters({...sample,privateKey:'do-not-export'}))});

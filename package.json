@@ -1,0 +1,46 @@
+{
+  "name": "second-chance-xo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "export": "tsx export.ts",
+    "check": "tsc --noEmit",
+    "dev": "node server.mjs",
+    "invitation": "tsx invitation.ts",
+    "wallet:init": "tsx wallet-init.ts",
+    "inspect": "tsx inspect.ts",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "plan": "tsx plan.ts",
+    "wallet:info": "tsx wallet-info.ts",
+    "wallet:utxos": "tsx wallet-utxos.ts",
+    "wallet:xo-address": "tsx xo-address.ts",
+    "wallet:move-plan": "tsx prepare-wallet-move.ts",
+    "wallet:xo-addresses": "tsx xo-addresses.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@bitauth/libauth": "^3.1.0-next.8",
+    "@xo-cash/engine": "0.1.1-next.18029697917",
+    "@xo-cash/types": "^0.0.9",
+    "@electrum-cash/servers": "4.2.0",
+    "@xo-cash/utils": "0.0.10",
+    "@xo-cash/templates": "0.0.12",
+    "@xo-cash/state": "0.0.5",
+    "@xo-cash/crypto": "0.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "private": true,
+  "overrides": {
+    "tar": "7.5.22",
+    "minimatch": "11.0.3",
+    "@tootallnate/once": "3.0.1"
+  }
+}

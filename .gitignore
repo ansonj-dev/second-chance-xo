@@ -1,0 +1,6 @@
+node_modules/
+.reference*/
+reference-*/
+.private/
+dist/
+.env

@@ -1,0 +1,6 @@
+{
+  "senderPublicKey": "02eee15b701846d72a58b272d239930b97164290e12d7c9719daecbbdba68d52bc",
+  "recipientPublicKey": "03132c390c7efad0b40bff3021e2d66a0c7d9d2df78f81b10352a09d6fbd67de4b",
+  "delayBlocks": 144,
+  "giftSatoshis": "25000"
+}
