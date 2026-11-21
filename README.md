@@ -10,7 +10,9 @@ Recoverable BCH gifts as a fresh XO template. The recipient may claim with their
 
 ## Run
 
-Use Node 24+, `npm install`, `npm run check`, `npm run export`, `npm run dev`. Open http://127.0.0.1:4202. The workbench plans amounts and delay and exports the template. It creates no keys or transaction. The template is in `template.ts`; exported JSON is in `dist/second-chance.xo.json`.
+Use Node 24+, `npm install`, `npm run check`, `npm run export`, `npm run dev`. Open http://127.0.0.1:4202.
+
+> Prerequisite: the XO engine pulls a native dependency (`better-sqlite3`) that compiles during install. On a machine without a C/C++ build toolchain (e.g. Visual Studio "Desktop development with C++" on Windows), `npm install`/`npm ci` will fail at the native build step. The offline checks here (`check`, `test`, `export`, `plan`, `inspect`) do not need that binary — run `npm install --ignore-scripts` to set up. The engine-backed wallet/invitation CLIs do need the native build. The workbench plans amounts and delay and exports the template. It creates no keys or transaction. The template is in `template.ts`; exported JSON is in `dist/second-chance.xo.json`.
 
 ## Create a real invitation
 
