@@ -1,2 +1,179 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Second Chance — recoverable BCH gifts</title><style>*{box-sizing:border-box}body{margin:0;background:#f1eee7;color:#1e342e;font:16px Georgia,serif}main{max-width:1000px;margin:auto;padding:40px 24px}.brand{font:700 14px system-ui;letter-spacing:.13em}nav{display:flex;justify-content:space-between;border-bottom:1px solid #bcc5b8;padding-bottom:24px}h1{font-size:clamp(44px,7vw,80px);line-height:1.02;max-width:750px;font-weight:400;margin:55px 0 20px}.intro{font:19px/1.6 system-ui;max-width:650px;color:#52665e}.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;margin:38px 0}article{background:#fffdf7;padding:28px;border:1px solid #cbd1c4;border-radius:5px}h2{font-weight:400;font-size:28px;margin-top:0}label{display:block;font:14px system-ui;margin:22px 0 8px}input{font:20px system-ui;width:100%;padding:13px;border:1px solid #a8b9aa;background:transparent;color:#1e342e}button,a.btn{display:inline-block;margin:24px 10px 0 0;background:#234d3c;color:white;text-decoration:none;border:0;padding:14px 18px;cursor:pointer;font:14px system-ui}small,.note{font:13px/1.6 system-ui;color:#617267}.tag{border:1px solid #8caa91;border-radius:30px;padding:7px 12px;font:12px system-ui}.step{padding:17px 0;border-bottom:1px solid #dce0d3;font:15px/1.6 system-ui}.step b{margin-right:12px;color:#a56432}#summary{font:18px/1.7 system-ui}footer{font:13px/1.7 system-ui;border-top:1px solid #bcc5b8;padding-top:22px}@media(max-width:650px){.grid{grid-template-columns:1fr}}</style><main><nav><span class="brand">SECOND CHANCE / BCH</span><span class="tag">Chipnet workbench</span></nav><h1>A small gift.<br>A way back.</h1><p class="intro">Send BCH with a recovery window. Your recipient has their own claim key. If the gift stays unspent, you can recover it after the block delay.</p><div class="grid"><article><h2>Plan a gift</h2><label for="amount">Gift amount · satoshis</label><input id="amount" type="number" min="1000" max="2100000000000000" step="1" value="25000"><label for="delay">Sender recovery delay · blocks</label><input id="delay" type="number" min="1" max="65535" step="1" value="144"><p id="summary" aria-live="polite"></p><button id="download">Download XO template</button><a class="btn" href="https://blaze.xo.cash/" target="_blank" rel="noreferrer">Open XO debug tool ↗</a><p class="note">Planning only. This screen creates no keys and broadcasts no transactions. Use the CLI to create a signed invitation.</p></article><article><h2>Two keys. Three actions.</h2><div class="step"><b>01</b>Sender and recipient exchange public keys, agree on the delay, and fund one contract output.</div><div class="step"><b>02</b>Recipient signs a claim to their chosen payout address.</div><div class="step"><b>03</b>After the delay, sender can sign a recovery. The first confirmed spend wins.</div><p class="note">A recovery delay is a minimum age in blocks, not an exact wall-clock deadline. Recipient claims remain valid after recovery matures.</p></article></div><details><summary>Reproduce and review</summary><p class="note">Run the export command before downloading. The public-parameter planner checks real curve points and compiles the same P2SH32 policy; compare its bytecode with the actual XO funding output. Use your own role keys. Funding, execution and debug-tool evidence remain pending.</p><p class="note"><code>npm run plan -- your-public-parameters.json</code><br><code>npm run test</code> runs offline policy checks. These do not prove chain confirmation or current UTXO age.</p></details><p id="download-status" class="note" role="status"></p><footer>XO template prototype · On-chain evidence pending funding · Keep real wallet seeds out of this workbench.</footer></main><script>const amount=document.querySelector('#amount'),delay=document.querySelector('#delay'),summary=document.querySelector('#summary');function update(){let a=Number(amount.value),d=Number(delay.value);summary.textContent=Number.isSafeInteger(a)&&a>=1000&&Number.isInteger(d)&&d>0&&d<=65535?`${(a/1e8).toFixed(8)} BCH · recovery becomes eligible after ${d} blocks (about ${(d/144).toFixed(1)} days at the target block interval).`:'Enter an integer amount of at least 1,000 sats and a delay of 1–65,535 blocks.'}amount.oninput=delay.oninput=update;update();document.querySelector('#download').onclick=async()=>{const status=document.querySelector('#download-status');try{const response=await fetch('/template.json');if(!response.ok)throw Error('Run npm run export, then retry.');const text=await response.text();const template=JSON.parse(text);if(!template.actions?.recover||!template.actions?.claim)throw Error('Unexpected template. Re-export from this project.');const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='second-chance.xo.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='Template downloaded. No invitation or transaction was executed.';}catch(error){status.textContent=error.message||'Download failed.';}}</script></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Second Chance: send Bitcoin Cash with a recovery window. A General Protocols XO template for recoverable gifts.">
+<meta name="color-scheme" content="light">
+<title>Second Chance &mdash; recoverable BCH gifts</title>
+<style>
+:root{--bg:#f1eee7;--paper:#fffdf7;--ink:#1e342e;--muted:#4d6158;--line:#cbd1c4;--green:#234d3c;--green-d:#173628;--accent:#8a4a1f;--focus:#b4531a;--serif:Georgia,"Times New Roman",serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--serif)}
+main{max-width:1040px;margin:auto;padding:24px 24px 40px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px;top:8px;background:var(--green);color:#fff;padding:10px 14px;font:14px var(--sans);z-index:5}
+.skip:focus{left:8px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:20px}
+.brand{font:700 14px var(--sans);letter-spacing:.13em}
+.tag{border:1px solid #6f9776;border-radius:30px;padding:6px 12px;font:600 12px var(--sans);color:var(--green)}
+.tag.warn{border-color:#c9a27d;color:var(--accent);background:#fbf3ea}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+h1{font-size:clamp(42px,7vw,78px);line-height:1.03;max-width:760px;font-weight:400;margin:52px 0 20px;letter-spacing:-.01em}
+h2{font-weight:400;font-size:28px;line-height:1.2;margin:0 0 12px}
+h3{font:700 16px var(--sans);margin:0 0 4px}
+.intro{font:19px/1.6 var(--sans);max-width:660px;color:var(--muted);margin:0}
+.cta-row{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap}
+section{margin-top:56px}
+.lede{font:17px/1.65 var(--sans);color:var(--muted);max-width:700px;margin:0 0 24px}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:28px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;list-style:none;padding:0;margin:0}
+article,.card{background:var(--paper);padding:26px;border:1px solid var(--line);border-radius:8px}
+.card p{font:15px/1.6 var(--sans);color:var(--muted);margin:8px 0 0}
+.role{font:700 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+label{display:block;font:600 14px var(--sans);margin:20px 0 6px}
+input[aria-invalid="true"]{border-color:#b4531a;box-shadow:0 0 0 2px #f0d5c3}
+input{font:20px var(--sans);width:100%;padding:12px 13px;border:1px solid #7f9a85;border-radius:4px;background:#fff;color:var(--ink)}
+.hint{font:13px/1.5 var(--sans);color:var(--muted);margin:6px 0 0}
+button,a.btn{display:inline-block;background:var(--green);color:#fff;text-decoration:none;border:2px solid var(--green);border-radius:4px;padding:12px 18px;cursor:pointer;font:600 15px var(--sans);min-height:44px}
+button:hover,a.btn:hover{background:var(--green-d)}
+a.btn.ghost{background:transparent;color:var(--green)}
+a.btn.ghost:hover{background:#e6ebe0}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.note{font:14px/1.6 var(--sans);color:var(--muted)}
+code{font:13px ui-monospace,Consolas,monospace;background:#ece9df;padding:2px 5px;border-radius:3px}
+#summary{font:17px/1.6 var(--sans);background:#eef2e8;border-left:4px solid var(--green);padding:12px 14px;margin:20px 0 0;border-radius:0 4px 4px 0}
+#download-status.bad{color:#8f3a0f}
+#summary.bad{background:#fbf0ea;border-color:#b4531a}
+ol.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+ol.steps li{counter-increment:s;padding:14px 0 14px 44px;position:relative;border-bottom:1px solid #dce0d3;font:15px/1.6 var(--sans)}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li:before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:14px;font-weight:700;color:var(--accent)}
+.status-table{width:100%;border-collapse:collapse;font:15px/1.5 var(--sans);background:var(--paper);border:1px solid var(--line);border-radius:8px}
+.status-table th,.status-table td{text-align:left;padding:12px 14px;border-bottom:1px solid #e3e6dc;vertical-align:top}
+.status-table th{font-weight:600;width:55%}
+.status-table tr:last-child th,.status-table tr:last-child td{border-bottom:0}
+.nomargin{margin:0}
+.pending{color:var(--accent);font-weight:600}
+.done{color:var(--green);font-weight:600}
+details{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:16px 22px;margin-top:28px}
+summary{cursor:pointer;font:600 16px var(--sans)}
+#download-status{min-height:1.6em;margin:14px 0 0}
+footer{font:13px/1.7 var(--sans);color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:56px}
+@media(max-width:820px){.cards{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+@media(max-width:480px){main{padding:16px}h1{margin-top:36px}article,.card{padding:20px}.status-table th,.status-table td{display:block;width:100%;padding:6px 14px}.status-table td{padding-bottom:12px}button,a.btn{width:100%;text-align:center}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<a class="skip" href="#plan">Skip to planner</a>
+<main>
+<nav aria-label="Primary">
+  <span class="brand">SECOND CHANCE / BCH</span>
+  <span class="tags"><span class="tag">Chipnet workbench</span><span class="tag warn">Not executed on-chain</span></span>
+</nav>
 
+<header>
+  <h1>A small gift.<br>A way back.</h1>
+  <p class="intro">Send Bitcoin Cash with a recovery window. Your recipient claims with their own key. If the gift sits unclaimed, you can take it back after a set number of blocks.</p>
+  <div class="cta-row">
+    <a class="btn" href="#plan">Plan a gift</a>
+    <a class="btn ghost" href="#how">How it works</a>
+  </div>
+</header>
+
+<section id="how" aria-labelledby="how-h">
+  <h2 id="how-h">What is a recoverable gift?</h2>
+  <p class="lede">A normal BCH payment cannot be undone. If you send it to the wrong address, or to someone who never picks it up, it is gone. A recoverable gift locks the coins in a contract with two ways out: the recipient can claim at any time, and the sender can recover once a waiting period has passed.</p>
+  <ul class="cards">
+    <li class="card"><span class="role">Role 1</span><h3>Sender</h3><p>Funds the gift and chooses the recovery delay. Cannot recover early, and cannot block the recipient.</p></li>
+    <li class="card"><span class="role">Role 2</span><h3>Recipient</h3><p>Claims to a payout address of their choice with their own key. No waiting period applies to the recipient.</p></li>
+    <li class="card"><span class="role">Role 3</span><h3>Recovery</h3><p>A separate recovery key held by the sender. It signs the return of the funds, only after the delay has matured.</p></li>
+  </ul>
+</section>
+
+<section id="plan" aria-labelledby="plan-h">
+  <div class="grid">
+    <article>
+      <h2 id="plan-h">Plan a gift</h2>
+      <p class="note nomargin">Adjust the numbers to see what the policy means. Nothing here is saved or sent.</p>
+      <label for="amount">Gift amount (satoshis)</label>
+      <input id="amount" type="number" inputmode="numeric" min="1000" max="2100000000000000" step="1" value="25000" aria-describedby="amount-hint summary">
+      <p id="amount-hint" class="hint">Minimum 1,000 sats. 100,000,000 sats = 1 BCH.</p>
+      <label for="delay">Sender recovery delay (blocks)</label>
+      <input id="delay" type="number" inputmode="numeric" min="1" max="65535" step="1" value="144" aria-describedby="delay-hint summary">
+      <p id="delay-hint" class="hint">1 to 65,535. About 144 blocks per day.</p>
+      <p id="summary" role="status" aria-live="polite"></p>
+      <div class="actions">
+        <button id="download" type="button">Download XO template</button>
+        <a class="btn ghost" href="https://blaze.xo.cash/" target="_blank" rel="noreferrer noopener">Open XO debug tool <span aria-hidden="true">&#8599;</span><span class="sr"> (opens in new tab)</span></a>
+      </div>
+      <p id="download-status" class="note" role="status" aria-live="polite"></p>
+      <p class="note">Planning only. This page creates no keys and broadcasts no transactions. Use the CLI to prepare an invitation.</p>
+    </article>
+    <article aria-labelledby="flow-h">
+      <h2 id="flow-h">Two keys, three steps</h2>
+      <ol class="steps">
+        <li><strong>Fund.</strong> Sender and recipient exchange public keys, agree on the delay, and the sender funds one contract output.</li>
+        <li><strong>Claim.</strong> The recipient signs a claim to their chosen payout address.</li>
+        <li><strong>Recover.</strong> After the delay, the sender can sign a recovery. The first confirmed spend wins.</li>
+      </ol>
+      <p class="note">The delay is a minimum age in blocks, not an exact deadline. The recipient can still claim after recovery becomes available, until a recovery confirms.</p>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="status-h">
+  <h2 id="status-h">Project status</h2>
+  <p class="lede">What exists today, and what has not been done yet.</p>
+  <table class="status-table">
+    <caption class="sr">Verification status</caption>
+    <thead><tr><th scope="col">Item</th><th scope="col">State</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">XO template exported and schema-validated</th><td class="done">Done (offline)</td></tr>
+      <tr><th scope="row">Offline policy tests (claim, recovery, wrong key, delay rules)</th><td class="done">Passing (offline)</td></tr>
+      <tr><th scope="row">Chipnet invitation executed in XO debug tool</th><td class="pending">Not executed / pending</td></tr>
+      <tr><th scope="row">Claim and recovery on Chipnet</th><td class="pending">Not executed / pending</td></tr>
+      <tr><th scope="row">Public demo and transaction evidence</th><td class="pending">Pending</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<details>
+  <summary>Reproduce and review</summary>
+  <p class="note">Run the export command before downloading. The public-parameter planner checks real curve points and compiles the same P2SH32 policy. Compare its bytecode with the actual XO funding output. Use your own role keys. Funding, execution and debug-tool evidence remain pending.</p>
+  <p class="note"><code>npm run plan -- your-public-parameters.json</code><br><code>npm test</code> runs offline policy checks. These do not prove chain confirmation or current UTXO age.</p>
+</details>
+
+<footer>XO template prototype. On-chain evidence pending funding. Keep real wallet seeds out of this workbench.</footer>
+</main>
+<script>
+const amount=document.querySelector('#amount'),delay=document.querySelector('#delay'),summary=document.querySelector('#summary');
+function update(){
+  const a=Number(amount.value),d=Number(delay.value);
+  const ok=Number.isSafeInteger(a)&&a>=1000&&a<=2100000000000000&&Number.isInteger(d)&&d>0&&d<=65535;
+  summary.classList.toggle('bad',!ok);amount.setAttribute('aria-invalid',String(!(Number.isSafeInteger(a)&&a>=1000&&a<=2100000000000000)));delay.setAttribute('aria-invalid',String(!(Number.isInteger(d)&&d>0&&d<=65535)));
+  summary.textContent=ok
+    ?`${(a/1e8).toFixed(8)} BCH. The recipient can claim any time. You can recover after ${d} blocks (about ${(d/144).toFixed(1)} days at the target block interval).`
+    :'Enter an integer amount of at least 1,000 sats and a delay of 1\u201365,535 blocks.';
+}
+amount.oninput=delay.oninput=update;update();
+document.querySelector('#download').onclick=async()=>{
+  const status=document.querySelector('#download-status');
+  try{
+    const response=await fetch('/template.json');
+    if(!response.ok)throw Error('Run npm run export, then retry.');
+    const text=await response.text();
+    const template=JSON.parse(text);
+    if(!template.actions?.recover||!template.actions?.claim)throw Error('Unexpected template. Re-export from this project.');
+    status.classList.remove('bad');const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+    const a=document.createElement('a');a.href=url;a.download='second-chance.xo.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    status.textContent='Template downloaded. No invitation or transaction was executed.';
+  }catch(error){status.classList.add('bad');status.textContent=error.message||'Download failed.';}
+};
+</script>
+</body>
+</html>
